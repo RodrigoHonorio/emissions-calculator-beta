@@ -95,6 +95,25 @@
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-spatial</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/org.n52.jackson/jackson-datatype-jts -->
+		<dependency>
+			<groupId>org.n52.jackson</groupId>
+			<artifactId>jackson-datatype-jts</artifactId>
+			<version>1.2.10</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- Source: https://mvnrepository.com/artifact/org.locationtech.jts.io/jts-io-common -->
+		<dependency>
+			<groupId>org.locationtech.jts.io</groupId>
+			<artifactId>jts-io-common</artifactId>
+			<version>1.19.0</version>
+			<scope>compile</scope>
+		</dependency>
 
 	</dependencies>
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spire Emissions Calculator - London Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased overflow-hidden">
+
+<header class="h-16 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-6 shadow-md z-20 relative">
+    <div class="flex items-center space-x-3">
+        <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
+        <h1 class="text-lg font-semibold tracking-wide">Spire Emissions Calculator <span class="text-xs text-slate-400 font-normal ml-2">London Infrastructure Dashboard</span></h1>
+    </div>
+    <div class="text-sm text-slate-400">
+        System Status: <span class="text-emerald-400 font-medium">Online (PostGIS Active)</span>
+    </div>
+</header>
+
+<div class="flex h-[calc(100vh-4rem)] w-full">
+    <aside class="w-80 bg-slate-800/50 border-r border-slate-700 p-6 flex flex-col justify-between z-10 shadow-lg overflow-y-auto">
+        <div class="space-y-6">
+            <div>
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Map Layers</h2>
+                <div class="space-y-2 text-sm">
+                    <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-slate-700/50 transition">
+                        <input type="checkbox" id="toggleBoroughs" checked class="rounded bg-slate-900 border-slate-600 text-emerald-500 focus:ring-0">
+                        <span>London Boroughs</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-slate-700/50 transition">
+                        <input type="checkbox" id="toggleGas" checked class="rounded bg-slate-900 border-slate-600 text-emerald-500 focus:ring-0">
+                        <span>Gas Stations</span>
+                    </label>
+                    <label class="flex items-center space-x-3 cursor-pointer p-2 rounded hover:bg-slate-700/50 transition">
+                        <input type="checkbox" id="toggleAir" checked class="rounded bg-slate-900 border-slate-600 text-emerald-500 focus:ring-0">
+                        <span>Air Quality Stations (LAQN)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Contentor dinâmico para barras de progresso -->
+            <div id="progress-container"></div>
+
+            <div class="border-t border-slate-700 pt-4">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Overview</h2>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Geospatial visualization of primary VOC emission sources and air quality control checkpoints across Greater London.
+                </p>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-700/50 pt-4 mt-4 space-y-3">
+            <!-- Botão do Autor & Projeto -->
+            <button id="openAuthorModal" class="w-full flex items-center justify-center gap-2 bg-slate-700/60 hover:bg-emerald-600/20 hover:border-emerald-500/50 border border-slate-600/80 text-slate-200 text-xs font-medium py-2.5 px-3 rounded-lg transition-all duration-200 group">
+                <svg class="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <span>About Author & Initiative</span>
+            </button>
+
+            <div class="text-[11px] text-slate-500 text-center">
+                Spire Beta Project &copy; 2026
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 relative h-full">
+        <div id="map"></div>
+    </main>
+</div>
+
+<!-- ================= MODAL DO AUTOR & PROJETO ================= -->
+<div id="authorModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative text-slate-200 space-y-5">
+
+        <!-- Botão Fechar (X) -->
+        <button id="closeAuthorModal" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+
+        <!-- Cabeçalho do Autor -->
+        <div class="flex items-center gap-4 border-b border-slate-700/80 pb-4">
+            <img src="/data/rodrigo.png" alt="Rodrigo Marcel Honorio" class="w-16 h-16 rounded-full border-2 border-emerald-500 object-cover shadow-lg flex-shrink-0">
+            <div>
+                <h3 class="text-lg font-bold text-slate-100">Rodrigo Marcel Honorio</h3>
+                <p class="text-xs text-emerald-400 font-medium">Software Engineer & AI Researcher</p>
+                <a href="mailto:rodrigo.honorio.uk@gmail.com" class="text-xs text-slate-400 hover:text-emerald-300 transition-colors flex items-center gap-1.5 mt-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    rodrigo.honorio.uk@gmail.com
+                </a>
+            </div>
+        </div>
+
+        <!-- Descrição do Projeto (Inglês Britânico) -->
+        <div class="text-xs leading-relaxed text-slate-300 space-y-3 max-h-80 overflow-y-auto pr-1">
+            <p>
+                <strong>Spire Emissions Calculator</strong> is a voluntary, non-profit software initiative developed to model and simulate critical Volatile Organic Compound (VOC) emission hotspots across urban environments.
+            </p>
+            <p>
+                By leveraging a bespoke Artificial Intelligence engine developed specifically for this project, the system predicts potential pollution spikes and unveils underlying risk factors. This allows local authorities and health specialists to take proactive measures to mitigate atmospheric toxicity and safeguard public health.
+            </p>
+            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60 text-slate-300">
+                <span class="text-emerald-400 font-semibold block mb-1">🔬 Scientific Rigour & Traceability</span>
+                All mathematical formulas, empirical constants, and baseline datasets used in this simulator are rigorously derived from peer-reviewed scientific literature and official governmental health agencies, ensuring complete transparency and data traceability.
+            </div>
+            <div class="bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-lg text-emerald-200">
+                <span class="font-semibold block mb-1">🤝 Open for Collaboration</span>
+                Community contributions are essential. Whether you are a software developer, data scientist, environmental engineer, or public health analyst, your expertise and support are warmly welcomed to help expand this project.
+            </div>
+        </div>
+
+        <!-- Rodapé do Modal -->
+        <div class="pt-2 border-t border-slate-700/60 flex justify-end">
+            <button id="closeAuthorModalBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs px-4 py-2 rounded-lg transition-colors">
+                Close Window
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/mapCore.js"></script>
+<script src="/js/loader.js"></script>
+<script src="/js/londonBoroughs.js"></script>
+<script src="/js/gasStations.js"></script>
+<script src="/js/airStations.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>
